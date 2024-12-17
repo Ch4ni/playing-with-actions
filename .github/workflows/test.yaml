@@ -1,0 +1,15 @@
+on:
+    # trigger the workflow on any pull request against the default branch (main)
+    pull_request:
+        types: [opened, reopened, synchronize]
+        branches: [ main ]
+
+jobs:
+    run-tests:
+        name: "Run the tests!"
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+            - uses: ./.github/actions/run-setup/
+            - uses: ./.github/actions/run-tests/

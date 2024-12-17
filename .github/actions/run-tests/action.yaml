@@ -1,0 +1,10 @@
+name: 'Run Tests'
+description: 'Install Dependencies, Run Tests'
+
+runs:
+    using: "composite"
+
+    steps:
+        - run: echo "Installing Dependencies ..."
+        - run: echo "Running tests ..."
+
