@@ -29,7 +29,7 @@ jobs:
         env:
             DEPLOYMENT_ENV: ${{ needs.get-deployment-env.outputs.deployment-env }}
             ENV_SECRET_FOO: ${{ secrets.ENV_SECRET_FOO }}
-            ENV_VAR_FOO: ${{ env.ENV_VAR_FOO }}
+            ENV_VAR_FOO: ${{ vars.ENV_VAR_FOO }}
         steps:
             - uses: actions/checkout@v4
             - uses: ./.github/actions/run-setup
