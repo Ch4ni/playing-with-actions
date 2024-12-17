@@ -12,7 +12,7 @@ jobs:
         steps:
             - id: get-deployment-env
               if: github.event.pull_request.merged == true
-              run: echo "deploymentEnv=develop" >> "${GITHUB_OUTPUT}"
+              run: echo "deploymentEnv=dev" >> "${GITHUB_OUTPUT}"
 
     run-deployment:
         needs: get-deployment-env
@@ -26,9 +26,7 @@ jobs:
 
         environment: ${{ needs.get-deployment-env.outputs.deployment-env }}
         env:
-            DEPLOYMENT_ENV: ${{ needs.get-deployment-env.outputs.deployment-env }}
-            ENV_SECRET_FOO: ${{ secrets.ENV_SECRET_FOO }}
-            ENV_VAR_FOO: ${{ vars.ENV_VAR_FOO }}
+            DEPLOYMENT_ENV: ${{ vars.STAGE_NAME }}
         steps:
             - uses: actions/checkout@v4
             - uses: ./.github/actions/run-setup
