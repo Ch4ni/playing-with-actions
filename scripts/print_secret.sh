@@ -1,3 +1,3 @@
 #! /usr/bin/env bash
 
-echo "Env Var is set to: ${ENV_VAR_FOO}" > /dev/stdout
+echo "Env Secret is set to: ${ENV_SECRET_FOO}" > /dev/stdout

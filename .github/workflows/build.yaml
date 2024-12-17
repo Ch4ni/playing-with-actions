@@ -1,6 +1,6 @@
 on:
-    push:
-        branches: [ main ]
+    # no-op
+    workflow_dispatch:
 
 jobs:
     build-branch:

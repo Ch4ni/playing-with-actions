@@ -12,7 +12,7 @@ jobs:
         steps:
             - id: get-deployment-env
               if: github.event.pull_request.merged == true
-              run: echo "deploymentEnv=develop" >> "${GITHUB_OUTPUT}"
+              run: echo "deploymentEnv=dev" >> "${GITHUB_OUTPUT}"
 
     run-deployment:
         needs: get-deployment-env
@@ -20,16 +20,22 @@ jobs:
         name: "Deploy"
         runs-on: ubuntu-latest
 
-        environment:
-            name: ${{ needs.get-deployment-env.outputs.deployment-env }}
+        defaults:
+            run:
+                shell: bash
+
+        environment: ${{ needs.get-deployment-env.outputs.deployment-env }}
         env:
-            DEPLOYMENT_ENV: ${{ needs.get-deployment-env.outputs.deployment-env }}
+            DEPLOYMENT_ENV: ${{ vars.STAGE_NAME }}
             ENV_VAR_FOO: ${{ vars.ENV_VAR_FOO }}
-            ENV_SECRET_FOO: ${{ vars.ENV_SECRET_FOO }}
+            ENV_SECRET_FOO: ${{ secrets.ENV_SECRET_FOO }}
         steps:
             - uses: actions/checkout@v4
             - uses: ./.github/actions/run-setup
             - uses: ./.github/actions/run-tests/
-            - run: echo "Foo = ${{ env.ENV_VAR_FOO }}"
+            - run: echo "Deployment Environment - ${DEPLOYMENT_ENV}"
+            - name: Debug - Printing out env.
+              run: env
+            - run: echo "Foo = ${ENV_VAR_FOO}"
             - run: ./scripts/print_secret.sh
             - run: echo "[PR#${{ github.event.pull_request.number }}]${{ github.event.pull_request.title }}"
