@@ -5,6 +5,8 @@ runs:
     using: "composite"
 
     steps:
-        - run: echo "Installing Dependencies ..."
-        - run: echo "Running tests ..."
+        - shell: bash
+          run: echo "Installing Dependencies ..."
+        - shell: bash
+          run: echo "Running tests ..."
 
