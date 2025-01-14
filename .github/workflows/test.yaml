@@ -27,6 +27,7 @@ jobs:
         - id: eclint-check
           # skip the rest of this job if running against a commit resulting from this job.
           if: ${{ steps.is-autocommit.outputs.is-auto-commit != 'true' }}
+          continue-on-error: true
           run: npm exec -y eclint -- check
 
         # if the code does not adhere, then make the code adhere to the .editorConfig file
@@ -38,7 +39,7 @@ jobs:
 
         # if we applied .editorconfig fixes, then commit those fixes and push them to the remote.
         - id: ci-commit
-          if: ${{ steps.eclint-fix.outputs.applied-editorconfig == 'true' }}
+          if: ${{ failure() && steps.eclint-fix.outputs.applied-editorconfig == 'true' }}
           run: |
             git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
             git config --global user.email "ada@unvale.io"
