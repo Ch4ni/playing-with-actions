@@ -46,6 +46,8 @@ jobs:
             # apply fixes if eclint found any issues
             if [[ ! $? -eq 0 ]]; then
               npm exec -y eclint -- fix
+              # restore .github/ directory from index (github permissions issue)
+              git checkout .github/
               echo "applied-fixes=true" >> "${GITHUB_OUTPUT}"
             fi
         # commit any changes made in eclint-enforce
