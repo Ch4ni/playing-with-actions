@@ -5,9 +5,54 @@ on:
         branches: [ main ]
 
 jobs:
+    enforceEditorConfig:
+      runs-on: ubuntu-latest
+      defaults:
+        run:
+          shell: bash
+      outputs:
+        committed-fixes: ${{ steps.ci-commit.outputs }}
+      env:
+        CI_COMMIT_MESSAGE: "[editorConfig] enforce .editorConfig"
+        CI_COMMIT_AUTHOR: "${{ github.event.repository.name }} Continuous Integration"
+      steps:
+        - uses: actions/checkout@v4
+
+        # check to see if running against a commit created by this job.
+        - id: is-auto-commit
+          if: ${{ github.events.commits[0].message == env.CI_COMMIT_MESSAGE && github.event.commits[0].author.name == env.CI_COMMIT_AUTHOR }}
+          run: echo "is-auto-commit=true" >> "${GITHUB_OUTPUT}"
+
+        # check to see if the code adheres to the .editorConfig file
+        - id: eclint-check
+          # skip the rest of this job if running against a commit resulting from this job.
+          if: ${{ steps.is-autocommit.outputs.is-auto-commit != 'true' }}
+          run: npm exec -y eclint -- check
+
+        # if the code does not adhere, then make the code adhere to the .editorConfig file
+        - id: eclint-fix
+          if: ${{ failure() && steps.eclint-check.conclusion == 'failure' && steps.is-auto-commit.outputs.is-auto-commit != 'true'}}
+          run: |
+            npm exec -y eclint -- fix
+            echo "applied-editorconfig=true" >> "${GITHUB_OUTPUT}"
+
+        # if we applied .editorconfig fixes, then commit those fixes and push them to the remote.
+        - id: ci-commit
+          if: ${{ steps.eclint-fix.outputs.applied-editorconfig == 'true' }}
+          run: |
+            git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
+            git config --global user.email "ada@unvale.io"
+            git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
+            git push
+            echo "committed-fixes=true" >> "${GITHUB_OUTPUT}"
+
     run-tests:
         name: "Run the tests!"
         runs-on: ubuntu-latest
+
+        needs: enforceEditorConfig
+
+        if: ${{ needs.enforceEditorConfig.outputs.committed-fixes != 'true' }}
 
         steps:
             - uses: actions/checkout@v4
