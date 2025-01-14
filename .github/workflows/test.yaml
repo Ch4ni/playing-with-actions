@@ -23,10 +23,15 @@ jobs:
           if: ${{ github.action.commits[0].message == env.CI_COMMIT_MESSAGE && github.action.commits[0].author.name == env.CI_COMMIT_AUTHOR }}
           run: echo "is-auto-commit=true" >> "${GITHUB_OUTPUT}"
 
+        - name: print info
+          run: |
+            echo "ref_name: ${{ github.ref_name }}, ${GITHUB_REF_NAME}"
+            echo "head_ref: ${{github.head_ref }}, ${GITHUB_HEAD_REF}"
         # check to see if the code adheres to the .editorConfig file
         - id: eclint-enforce
           # skip the rest of this job if running against a commit resulting from this job.
           if: ${{ steps.is-auto-commit.outputs.is-auto-commit != 'true' }}
+          name: apply .editorconfig
           run: |
             # disable "exit immediately on error"
             set +e
@@ -41,6 +46,7 @@ jobs:
             fi
         # commit any changes made in eclint-enforce
         - id: commit-changes
+          name: commit changes
           if: ${{ steps.eclint-enforce.outputs.applied-fixes == 'true' }}
           run: |
             git config --global user.name "${{ env.CI_COMMIT_AUTHOR}}"
