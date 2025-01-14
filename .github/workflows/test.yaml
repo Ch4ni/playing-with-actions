@@ -50,7 +50,10 @@ jobs:
             git config --global user.name "${{ env.CI_COMMIT_AUTHOR}}"
             git config --global user.email "ch4ni@adahome.dev"
             git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
-            git push -u ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY} "${GITHUB_HEAD_REF}"
+            git status
+            git fetch origin
+            git rebase --strategy-option=theirs origin/${GITHUB_HEAD_REF} --verbose
+            git push --verbose -u origin ${GITHUB_HEAD_REF}
             echo "committed-fixes=true" >> "${GITHUB_OUTPUT}"
 
     run-tests:
