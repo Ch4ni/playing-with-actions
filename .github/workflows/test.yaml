@@ -77,12 +77,7 @@ jobs:
             - name: Show Commit Info
               if: ${{ needs.enforceEditorConfig.outputs.committed-fixes == 'true' }}
               run: |
-                echo "Showing info from the last 2 commits:"
-                git log --pretty=oneline -2
-            - name: Show Commit Info
-              if: ${{ needs.enforceEditorConfig.outputs.committed-fixes != 'true' }}
-              run: |
-                echo "Showing info from the last commit:"
-                git log --pretty=oneline -1
+                echo "Showing info from the last 10 commits:"
+                log --pretty=format:\"%C(yellow)%h %ar %C(auto)%d %Creset %s, %Cblue%cn\" --graph
             - uses: ./.github/actions/run-setup/
             - uses: ./.github/actions/run-tests/
