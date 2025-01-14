@@ -11,7 +11,7 @@ jobs:
         run:
           shell: bash
       outputs:
-        committed-fixes: ${{ steps.ci-commit.outputs.applied-editorconfig }}
+        committed-fixes: ${{ steps.commit-changes.outputs.committed-fixes }}
       env:
         CI_COMMIT_MESSAGE: "[editorConfig] enforce .editorConfig"
         CI_COMMIT_AUTHOR: "${{ github.event.repository.name }} Continuous Integration"
@@ -20,36 +20,31 @@ jobs:
 
         # check to see if running against a commit created by this job.
         - id: is-auto-commit
-          if: ${{ github.events.commits[0].message == env.CI_COMMIT_MESSAGE && github.event.commits[0].author.name == env.CI_COMMIT_AUTHOR }}
+          if: ${{ github.action.commits[0].message == env.CI_COMMIT_MESSAGE && github.action.commits[0].author.name == env.CI_COMMIT_AUTHOR }}
           run: echo "is-auto-commit=true" >> "${GITHUB_OUTPUT}"
 
         # check to see if the code adheres to the .editorConfig file
-        - id: eclint-check
+        - id: eclint-enforce
           # skip the rest of this job if running against a commit resulting from this job.
-          if: ${{ steps.is-autocommit.outputs.is-auto-commit != 'true' }}
+          if: ${{ steps.is-auto-commit.outputs.is-auto-commit != 'true' }}
           run: |
+            # disable "exit immediately on error"
             set +e
-
+            # check to see if changes are required - redirect stderr > stdout
+            # (build steps will fail on output to stderr)
             npm exec -y eclint -- check 2>&1
-            if [[ $? -eq 0 ]]; then
-              echo "needs-fix=false" >> "${GITHUB_OUTPUT}"
-            else
-              echo "needs-fix=true" >> "${GITHUB_OUTPUT}"
+
+            # apply fixes if eclint found any issues
+            if [[ ! $? -eq 0 ]]; then
+              npm exec -y eclint -- fix
+              echo "applied-fixes=true" >> "${GITHUB_OUTPUT}"
             fi
-
-        # if the code does not adhere, then make the code adhere to the .editorConfig file
-        - id: eclint-fix
-          if: ${{ steps.is-auto-commit.outputs.is-auto-commit != 'true' && steps.eclint-check.needs-fix == 'true' }}
+        # commit any changes made in eclint-enforce
+        - id: commit-changes
+          if: ${{ steps.eclint-enforce.outputs.applied-fixes == 'true' }}
           run: |
-            npm exec -y eclint -- fix
-            echo "applied-editorconfig=true" >> "${GITHUB_OUTPUT}"
-
-        # if we applied .editorconfig fixes, then commit those fixes and push them to the remote.
-        - id: ci-commit
-          if: ${{ steps.eclint-fix.outputs.applied-editorconfig == 'true' }}
-          run: |
-            git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
-            git config --global user.email "ada@unvale.io"
+            git config --global user.name "${{ env.CI_COMMIT_AUTHOR}}"
+            git config --global user.email "ch4ni@adahome.dev"
             git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
             git push
             echo "committed-fixes=true" >> "${GITHUB_OUTPUT}"
@@ -60,6 +55,7 @@ jobs:
 
         needs: enforceEditorConfig
 
+        # skip running tests if there's a new commit queued against the PR.
         if: ${{ needs.enforceEditorConfig.outputs.committed-fixes != 'true' }}
 
         steps:
