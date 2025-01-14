@@ -75,7 +75,6 @@ jobs:
               with:
                 ref: ${{ github.event.pull_request.head.ref }}
             - name: Show Commit Info
-              if: ${{ needs.enforceEditorConfig.outputs.committed-fixes == 'true' }}
               run: |
                 echo "Showing info from the last 10 commits:"
                 log --pretty=format:\"%C(yellow)%h %ar %C(auto)%d %Creset %s, %Cblue%cn\" --graph
