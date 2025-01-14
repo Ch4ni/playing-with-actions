@@ -72,6 +72,8 @@ jobs:
 
         steps:
             - uses: actions/checkout@v4
+              with:
+                ref: ${{ github.event.pull_request.head.ref }}
             - name: Show Commit Info
               if: ${{ needs.enforceEditorConfig.outputs.committed-fixes == 'true' }}
               run: |
