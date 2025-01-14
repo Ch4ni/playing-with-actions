@@ -30,7 +30,7 @@ jobs:
           run: |
             set +e
 
-            npm exec -y eclint -- check
+            npm exec -y eclint -- check 2>&1
             if [[ $? -eq 0 ]]; then
               echo "needs-fix=false" >> "${GITHUB_OUTPUT}"
             else
