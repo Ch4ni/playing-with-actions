@@ -6,6 +6,10 @@ on:
 
 jobs:
     enforceEditorConfig:
+      permissions:
+        contents: write
+        pull-requests: write
+        actions: write
       runs-on: ubuntu-latest
       defaults:
         run:
