@@ -77,6 +77,6 @@ jobs:
             - name: Show Commit Info
               run: |
                 echo "Showing info from the last 10 commits:"
-                git log --pretty=format:"%C(yellow)%h %ar %C(auto)%d %Creset %s, %Cblue%cn" --graph
+                git log --pretty=format:"%C(yellow)%h %ar %C(auto)%d %Creset %s, %Cblue%cn" --graph -10
             - uses: ./.github/actions/run-setup/
             - uses: ./.github/actions/run-tests/
