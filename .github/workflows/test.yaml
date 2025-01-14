@@ -11,7 +11,7 @@ jobs:
         run:
           shell: bash
       outputs:
-        committed-fixes: ${{ steps.ci-commit.outputs }}
+        committed-fixes: ${{ steps.ci-commit.outputs.applied-editorconfig }}
       env:
         CI_COMMIT_MESSAGE: "[editorConfig] enforce .editorConfig"
         CI_COMMIT_AUTHOR: "${{ github.event.repository.name }} Continuous Integration"
