@@ -17,6 +17,8 @@ jobs:
         CI_COMMIT_AUTHOR: "${{ github.event.repository.name }} Continuous Integration"
       steps:
         - uses: actions/checkout@v4
+          with:
+            ref: ${{ github.event.pull_request.head.ref }}
 
         # check to see if running against a commit created by this job.
         - id: is-auto-commit
@@ -50,10 +52,7 @@ jobs:
             git config --global user.name "${{ env.CI_COMMIT_AUTHOR}}"
             git config --global user.email "ch4ni@adahome.dev"
             git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
-            git status
-            git fetch origin
-            git rebase --strategy-option=theirs origin/${GITHUB_HEAD_REF} --verbose
-            git push --verbose -u origin ${GITHUB_HEAD_REF}
+            git push --verbose
             echo "committed-fixes=true" >> "${GITHUB_OUTPUT}"
 
     run-tests:
