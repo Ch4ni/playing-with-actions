@@ -3,13 +3,31 @@ on:
     pull_request:
         types: [opened, reopened, synchronize]
         branches: [ main ]
+    issue_comment:
+        types: [ created]
 
 jobs:
     run-tests:
         name: "Run the tests!"
         runs-on: ubuntu-latest
 
+        defaults:
+            run:
+                shell: bash
+
+        if: ${{ github.event.pull_request.merged == true || (github.event.issue.pull_request && contains(github.event.issue.body, '@workflow run')) }}
+
+
         steps:
-            - uses: actions/checkout@v4
-            - uses: ./.github/actions/run-setup/
-            - uses: ./.github/actions/run-tests/
+            -   if: ${{ github.event.pull_request }}
+                name: checkout (PR)
+                uses: actions/checkout@v4
+            -   if: ${{ github.event.issue.comment }}
+                name: checkout (comment)
+                uses: actions/checkout@v4
+                with:
+                    ref: ${{ github.event.issue.comment.pull_request.url }}
+            -   name: output github context
+                run: echo "${{ github }}"
+            # - uses: ./.github/actions/run-setup/
+            # - uses: ./.github/actions/run-tests/
