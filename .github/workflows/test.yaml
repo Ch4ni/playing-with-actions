@@ -16,18 +16,25 @@ jobs:
                 shell: bash
 
         # if: ${{ github.event.pull_request.merged == true || (github.event.issue.pull_request && contains(github.event.issue.body, '@workflow run')) }}
-        if: ${{ github.event.pull_request.merged == true || (github.event.push && contains(github.event.head_commit.message , '[FORCE buildAndPush]')) }}
-
+        if: ${{ github.event.pull_request.merged == true || github.event.push }}
+ # (github.event.push && contains(github.event.head_commit.message , '[FORCE buildAndPush]'))
         steps:
             -   name: get event info
                 run: echo "${{ github }}" 
-                    
+
+            -   if: ${{ github.event.push && 
             -   if: ${{ github.event.pull_request }}
                 name: checkout (PR)
                 uses: actions/checkout@v4
 
             -   if: ${{ github.event.push }}
-                name: checkout (push @ ${{github.sha}})
+                name: push commit message
+                run: echo ${{github.event.head_commit.message}}
+
+            -   name: commit message contains expected message?
+                run: echo 'contains [FORCE buildAndPush]? ' ${{ contains(github.event.head_commit.message, '[FORCE buildAndPush]') }}
+            
+            -   name: checkout (push @ ${{github.sha}})
                 uses: actions/checkout@v4
 
             -   name: output github context
