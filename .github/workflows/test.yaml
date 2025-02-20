@@ -21,6 +21,9 @@ jobs:
             -   name: get event info
                 run: echo "${{ toJson(github) }}"
 
+            -   name: print github output
+                run: echo "${GITHUB_OUTPUT}"
+
             -   name: checkout (PR)
                 uses: actions/checkout@v4
 
