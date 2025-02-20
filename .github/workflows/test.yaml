@@ -15,12 +15,13 @@ jobs:
             run:
                 shell: bash
 
+        if: ${{ github.event.pull_request || github.event.head_commit }}
+
         steps:
             -   name: get event info
                 run: echo "${{ toJson(github) }}"
 
-            -   if: ${{ github.event.pull_request || github.event.head_commit }}
-                name: checkout (PR)
+            -   name: checkout (PR)
                 uses: actions/checkout@v4
 
             -   if: ${{ github.event.head_commit }}
@@ -32,10 +33,8 @@ jobs:
                 run: |
                     echo "Commit Message: ${{github.event.head_commit.message}}"
                     echo "Commit Hash: ${__commit_hash:0:7}"
-                    echo "Short Commit Hash: ${__short_commit_hash}"
                 env:
                     __commit_hash: ${{ github.event.head_commit.id }}
-                    __short_commit_hash: ${__commit_hash:0:7}
 
             -   name: commit message contains expected message?
                 run: echo 'contains [FORCE buildAndPush]? ' ${{ contains(github.event.head_commit.message, '[FORCE buildAndPush]') }}
