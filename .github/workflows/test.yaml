@@ -24,6 +24,15 @@ jobs:
             -   name: print github output
                 run: echo "${GITHUB_OUTPUT}"
 
+            -   name: make a calculation
+                id: random-calculation
+                run: echo "random-path=${PWD}-${RANDOM}" | tee "${GITHUB_OUTPUT}"
+
+            -   name: print the random calculation result
+                run: echo "${PREVIOUS_RESULT}"
+                env:
+                    PREVIOUS_RESULT: ${{ steps.random-calculation.outputs.random-path }}
+
             -   name: checkout (PR)
                 uses: actions/checkout@v4
 
