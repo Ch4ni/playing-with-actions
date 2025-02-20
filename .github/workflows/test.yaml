@@ -15,7 +15,7 @@ jobs:
             run:
                 shell: bash
 
-        if: ${{ (github.event.pull_request && github.event.pull_request.merged) || github.event.head_commit }}
+        if: ${{ (github.event.pull_request && github.event.pull_request.merged) || (github.event.head_commit && contains(github.event.head_commit.message, '[FORCE buildAndPush]')) }}
 
         steps:
             -   name: get event info
