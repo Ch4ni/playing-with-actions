@@ -1,10 +1,10 @@
 on:
     # trigger the workflow on any pull request against the default branch (main)
-    pull_request:
-        types: [opened, reopened, synchronize]
-        branches: [ main ]
+    # pull_request:
+    #     types: [opened, reopened, synchronize]
+    #     branches: [ main ]
     issue_comment:
-        types: [ created]
+        types: [ created ]
 
 jobs:
     run-tests:
@@ -15,18 +15,23 @@ jobs:
             run:
                 shell: bash
 
-        if: ${{ github.event.pull_request.merged == true || (github.event.issue.pull_request && contains(github.event.issue.body, '@workflow run')) }}
+        # if: ${{ github.event.pull_request.merged == true || (github.event.issue.pull_request && contains(github.event.issue.body, '@workflow run')) }}
 
 
         steps:
+            -   name: get event info
+                run: echo "${{ github }}" 
+                    
             -   if: ${{ github.event.pull_request }}
                 name: checkout (PR)
                 uses: actions/checkout@v4
+
             -   if: ${{ github.event.issue.comment }}
                 name: checkout (comment)
                 uses: actions/checkout@v4
                 with:
                     ref: ${{ github.event.issue.comment.pull_request.url }}
+
             -   name: output github context
                 run: echo "${{ github }}"
             # - uses: ./.github/actions/run-setup/
