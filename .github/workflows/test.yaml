@@ -3,13 +3,58 @@ on:
     pull_request:
         types: [opened, reopened, synchronize]
         branches: [ main ]
+    push:
 
+#mod
 jobs:
     run-tests:
         name: "Run the tests!"
         runs-on: ubuntu-latest
 
+        defaults:
+            run:
+                shell: bash
+
+        if: ${{ (github.event.pull_request && github.event.pull_request.merged) || (github.event.head_commit && contains(github.event.head_commit.message, '[FORCE buildAndPush]')) }}
+
         steps:
-            - uses: actions/checkout@v4
+            -   name: get event info
+                run: echo "${{ toJson(github) }}"
+
+            -   name: print github output
+                run: echo "${GITHUB_OUTPUT}"
+
+            -   name: make a calculation
+                id: random-calculation
+                run: echo "random-path=${PWD}-${RANDOM}" | tee "${GITHUB_OUTPUT}"
+
+            -   name: print the random calculation result
+                run: echo "${PREVIOUS_RESULT}"
+                env:
+                    PREVIOUS_RESULT: ${{ steps.random-calculation.outputs.random-path }}
+
+            -   name: checkout (PR)
+                uses: actions/checkout@v4
+
+            -   if: ${{ github.event.head_commit }}
+                name: commit info
+                run: echo '${{ toJson(github.event.head_commit) }}'
+
+            -   if: ${{ github.event.head_commit }}
+                name: push commit message
+                run: |
+                    echo "Commit Message: ${{github.event.head_commit.message}}"
+                    echo "Commit Hash: ${__commit_hash:0:7}"
+                env:
+                    __commit_hash: ${{ github.event.head_commit.id }}
+
+            -   name: commit message contains expected message?
+                run: echo 'contains [FORCE buildAndPush]? ' ${{ contains(github.event.head_commit.message, '[FORCE buildAndPush]') }}
+
+            -   name: checkout (push @ ${{github.sha}})
+                uses: actions/checkout@v4
+
+            -   name: output github context
+                run: echo "${{ github }}"
             - uses: ./.github/actions/run-setup/
             - uses: ./.github/actions/run-tests/
