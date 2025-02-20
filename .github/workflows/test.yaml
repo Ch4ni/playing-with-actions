@@ -15,7 +15,7 @@ jobs:
             run:
                 shell: bash
 
-        if: ${{ github.event.pull_request || github.event.head_commit }}
+        if: ${{ (github.event.pull_request && github.event.pull_request.merged) || github.event.head_commit }}
 
         steps:
             -   name: get event info
